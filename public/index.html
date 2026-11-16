@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>সহজ কাজ করে টাকা ইনকাম</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#140B2E;--panel:#1E1442;--line:#352463;--gold:#F5B301;--blue:#29A9EB;--text:#F4F0FF;--mute:#A99BD0;--ok:#35D08A;--bad:#FF6B6B}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Hind Siliguri',system-ui,sans-serif;padding:16px 16px 110px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.av{width:46px;height:46px;border-radius:14px;background:var(--gold);color:#4A2D00;display:grid;place-items:center;font-weight:600;font-size:18px}
+.top b{display:block;font-size:16px;font-weight:500}.top small{color:var(--mute);font-size:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
+.bal{text-align:center}.bal small{color:var(--mute);font-size:13px}
+.bal h1{font-size:46px;font-weight:600;color:var(--gold);line-height:1.2}
+.bal p{color:var(--ok);font-size:14px}
+.row{display:flex;gap:10px;margin-top:14px}
+.stat{flex:1;background:var(--bg);border-radius:14px;padding:12px}
+.stat small{color:var(--mute);font-size:12px;display:block}.stat b{font-size:22px;font-weight:600}
+h2{font-size:17px;font-weight:500;margin-bottom:10px}
+.mute{color:var(--mute);font-size:13px;line-height:1.5}
+.link{background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:10px;font-size:13px;word-break:break-all;margin:10px 0}
+button{font-family:inherit;font-size:16px;font-weight:500;border:0;border-radius:14px;padding:13px;width:100%;color:#fff;background:var(--blue);cursor:pointer}
+button.gold{background:var(--gold);color:#3A2400}button.ghost{background:var(--line)}
+button:disabled{opacity:.5}
+.btns{display:flex;gap:10px}
+.task{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.task:first-of-type{border-top:0}
+.task div{flex:1}.task b{font-weight:500;font-size:15px;display:block}.task small{color:var(--gold);font-size:13px}
+.task button{width:auto;padding:9px 16px;font-size:14px}
+.bar{height:8px;background:var(--bg);border-radius:8px;overflow:hidden;margin:10px 0 6px}
+.bar i{display:block;height:100%;background:var(--blue);width:0}
+select,input{font-family:inherit;width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:13px;font-size:16px;margin-bottom:10px}
+.h{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.h:first-of-type{border-top:0}
+.pending{color:var(--gold)}.paid{color:var(--ok)}.rejected{color:var(--bad)}
+.page{display:none}.page.on{display:block}
+nav{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));background:#0C0620;border:1px solid var(--line);border-radius:24px;display:flex;padding:6px}
+nav a{flex:1;text-align:center;padding:10px 0;border-radius:18px;color:var(--mute);font-size:13px;cursor:pointer}
+nav a.on{background:var(--panel);color:var(--gold)}
+nav span{display:block;font-size:20px}
+#toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:#fff;color:#222;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:88%;text-align:center;z-index:9}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<div class="top"><div class="av" id="av">?</div><div><b id="name">লোড হচ্ছে...</b><small id="uid"></small></div></div>
+
+<div class="card bal">
+  <small>আপনার ব্যালেন্স</small>
+  <h1 id="bal">৳0.00</h1>
+  <p id="total">মোট আয়: ৳0.00</p>
+  <div class="row">
+    <div class="stat"><small>আজকের অ্যাড</small><b id="ads">0/20</b></div>
+    <div class="stat"><small>মোট রেফারেল</small><b id="refs">0 জন</b></div>
+  </div>
+</div>
+
+<section class="page on" id="p-home">
+  <div class="card">
+    <h2>বন্ধুদের রেফার করুন</h2>
+    <p class="mute" id="refText"></p>
+    <div class="link" id="refLink"></div>
+    <div class="btns"><button class="ghost" id="copy">কপি</button><button id="share">শেয়ার</button></div>
+  </div>
+</section>
+
+<section class="page" id="p-task">
+  <div class="card">
+    <h2>বিজ্ঞাপন দেখে আয়</h2>
+    <p class="mute" id="adText"></p>
+    <div class="bar"><i id="adBar"></i></div>
+    <p class="mute" id="adProg" style="margin-bottom:12px"></p>
+    <button class="gold" id="watch">বিজ্ঞাপন দেখুন</button>
+  </div>
+  <div class="card">
+    <h2>সোশ্যাল টাস্ক</h2>
+    <div id="tasks"><p class="mute">এখনো কোনো টাস্ক নেই</p></div>
+  </div>
+</section>
+
+<section class="page" id="p-wd">
+  <div class="card">
+    <h2>উইথড্র</h2>
+    <select id="method"><option>bKash</option><option>Nagad</option></select>
+    <input id="number" inputmode="numeric" maxlength="11" placeholder="অ্যাকাউন্ট নম্বর (01XXXXXXXXX)">
+    <input id="amount" inputmode="decimal" placeholder="পরিমাণ">
+    <p class="mute" id="minText" style="margin-bottom:10px"></p>
+    <button id="wdBtn">উইথড্র রিকোয়েস্ট করুন</button>
+  </div>
+  <div class="card">
+    <h2>উইথড্র হিস্ট্রি</h2>
+    <div id="hist"><p class="mute">এখনো কোনো উইথড্র রিকোয়েস্ট নেই</p></div>
+  </div>
+</section>
+
+<nav>
+  <a class="on" data-p="home"><span>🏠</span>হোম</a>
+  <a data-p="task"><span>🎁</span>টাস্ক</a>
+  <a data-p="wd"><span>💳</span>উইথড্র</a>
+</nav>
+
+<script>
+const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
+const $ = (id) => document.getElementById(id);
+const money = (n) => '৳' + Number(n).toFixed(2);
+let D = null, adc = null;
+
+async function api(url, body) {
+  const opt = { headers: { 'x-init-data': tg.initData, 'Content-Type': 'application/json' } };
+  if (body) { opt.method = 'POST'; opt.body = JSON.stringify(body); }
+  const r = await fetch(url, opt);
+  return r.json();
+}
+function toast(t) { const e = $('toast'); e.textContent = t; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 2600); }
+
+async function load() {
+  const d = await api('/api/me');
+  if (d.error) { $('name').textContent = 'টেলিগ্রাম থেকে অ্যাপটি খুলুন'; return; }
+  D = d; render();
+  if (!adc && D.cfg.adsgramBlockId && window.Adsgram) adc = window.Adsgram.init({ blockId: D.cfg.adsgramBlockId });
+}
+
+function render() {
+  const c = D.cfg;
+  $('av').textContent = (D.name || '?').trim().slice(0, 2).toUpperCase();
+  $('name').textContent = D.name; $('uid').textContent = 'TG ID: ' + D.id;
+  $('bal').textContent = money(D.balance); $('total').textContent = 'মোট আয়: ' + money(D.total);
+  $('ads').textContent = D.adsToday + '/' + c.dailyAds; $('refs').textContent = D.refs + ' জন';
+  $('refText').textContent = `প্রতিটি রেফারে ${money(c.refBonus)} বোনাস পান`;
+  $('refLink').textContent = `https://t.me/${c.botUsername}?start=${D.id}`;
+  $('adText').textContent = `প্রতিটি বিজ্ঞাপনে ${money(c.adReward)} আয় করুন`;
+  $('adBar').style.width = Math.min(100, (D.adsToday / c.dailyAds) * 100) + '%';
+  $('adProg').textContent = `আজ ${D.adsToday} / ${c.dailyAds}`;
+  $('minText').textContent = `সর্বনিম্ন উইথড্র ${money(c.minWithdraw)}`;
+
+  const T = $('tasks'); T.innerHTML = '';
+  if (!D.tasks.length) T.innerHTML = '<p class="mute">এখনো কোনো টাস্ক নেই</p>';
+  D.tasks.forEach((t) => {
+    const row = document.createElement('div'); row.className = 'task';
+    const info = document.createElement('div');
+    const b = document.createElement('b'); b.textContent = t.title;
+    const s = document.createElement('small'); s.textContent = '+' + money(t.reward) + ' বোনাস';
+    info.append(b, s);
+    const btn = document.createElement('button');
+    if (t.done) { btn.textContent = 'সম্পন্ন'; btn.disabled = true; btn.className = 'ghost'; }
+    else {
+      btn.textContent = 'JOIN'; btn.className = 'ghost'; let joined = false;
+      btn.onclick = async () => {
+        if (!joined) { tg.openTelegramLink(t.link); joined = true; btn.textContent = 'যাচাই করুন'; btn.className = ''; return; }
+        btn.disabled = true;
+        const r = await api('/api/task/claim', { id: t.id });
+        if (r.error) { toast(r.error); btn.disabled = false; } else { toast('বোনাস যোগ হয়েছে 🎉'); load(); }
+      };
+    }
+    row.append(info, btn); T.append(row);
+  });
+
+  const H = $('hist'); H.innerHTML = '';
+  if (!D.withdraws.length) H.innerHTML = '<p class="mute">এখনো কোনো উইথড্র রিকোয়েস্ট নেই</p>';
+  const st = { pending: 'অপেক্ষমাণ', paid: 'পরিশোধিত', rejected: 'বাতিল' };
+  D.withdraws.forEach((w) => {
+    const r = document.createElement('div'); r.className = 'h';
+    const a = document.createElement('span'); a.textContent = `${w.method} · ${money(w.amount)}`;
+    const b = document.createElement('span'); b.className = w.status; b.textContent = st[w.status];
+    r.append(a, b); H.append(r);
+  });
+}
+
+$('watch').onclick = async () => {
+  if (!D) return;
+  if (D.adsToday >= D.cfg.dailyAds) return toast('আজকের লিমিট শেষ');
+  if (D.cfg.testMode) { await api('/api/ad/test', {}); toast('টেস্ট রিওয়ার্ড যোগ হয়েছে'); return load(); }
+  if (!adc) return toast('বিজ্ঞাপন এখনো চালু হয়নি');
+  try {
+    await adc.show();
+    toast('রিওয়ার্ড যোগ হচ্ছে...');
+    setTimeout(load, 2500);
+  } catch (e) { toast('পুরস্কার পেতে পুরো বিজ্ঞাপন দেখুন'); }
+};
+
+$('wdBtn').onclick = async () => {
+  const btn = $('wdBtn'); btn.disabled = true;
+  const r = await api('/api/withdraw', { method: $('method').value, number: $('number').value.trim(), amount: $('amount').value });
+  btn.disabled = false;
+  if (r.error) return toast(r.error);
+  toast('রিকোয়েস্ট পাঠানো হয়েছে'); $('amount').value = ''; load();
+};
+
+$('copy').onclick = () => { navigator.clipboard.writeText($('refLink').textContent); toast('লিংক কপি হয়েছে'); };
+$('share').onclick = () => {
+  const link = $('refLink').textContent;
+  tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent('সহজ কাজ করে টাকা ইনকাম করুন! 🎁'));
+};
+
+document.querySelectorAll('nav a').forEach((a) => a.onclick = () => {
+  document.querySelectorAll('nav a').forEach((x) => x.classList.toggle('on', x === a));
+  document.querySelectorAll('.page').forEach((p) => p.classList.toggle('on', p.id === 'p-' + a.dataset.p));
+  window.scrollTo(0, 0);
+});
+
+load();
+</script>
+</body>
+  </html>
